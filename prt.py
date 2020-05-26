@@ -22,16 +22,21 @@ def main():
     print("\nHello user and welcome to Network Port Scanner!")
     print("Please insert a IP address that you want to scan for open and closed ports.")
     print("The range of ports scanned is 1-65535.")
-    u_ip = input("\nTarget IP: ")
     port = [22, 80, 23, 5060, 8080, 7547, 2323, 81, 25, 2222, 8081, 9200, 8090, 52869, 37777, 37215, 2332, 2223, 5061,
             100]
     open_pcounter = 0
     closed_pcounter = 0
 
-    if u_ip is not None:
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("10.255.255.255", 80))
+    userIP=s.getsockname()[0]
+    print(userIP)
+
+
+    if userIP is not None:
         for p in port:
             start_ptime = time.time()
-            c = SConnect(u_ip, p)
+            c = SConnect(userIP, p)
             if c.portscan() == 0:
                 print("Port {} is open".format(p))
                 open_pcounter += 1
