@@ -1,6 +1,7 @@
 import socket
 import logging
 import time
+from prettytable import PrettyTable
 from tabulate import tabulate
 
 
@@ -21,10 +22,13 @@ def main():
     logging.basicConfig(filename="errlog.log", format="%(asctime)s : %(message)s")
     logging.info("Start")
 
-    port = [22, 80, 23, 5060, 8080, 7547, 2323, 81, 25, 2222, 8081, 9200, 8090, 52869, 37777, 37215, 2332, 2223, 5061,
-            100]
-    n = (
-        "22 \n80 \n23 \n5060 \n8080 \n7547 \n2323 \n81 \n25 \n2222 \n8081 \n9200 \n8090 \n52869 \n37777 \n37215 \n2332 \n2223 \n5061 \n100")
+    x = PrettyTable()
+    port = {22: "close", 80: "close", 23: "close", 5060: "close", 8080: "close", 7547: "close", 2323: "close",
+            81: "close", 25: "close", 2222: "close", 8081: "close", 9200: "close", 8090: "close", 52869: "close",
+            37777: "close", 37215: "close", 2332: "close", 2223: "close", 5061: "close", 100: "close"}
+    x.align = "l"
+    x.title = "Portscan"
+    x.field_names = ["Port No", "Status"]
     open_pcounter = 0
 
     closed_pcounter = 0
@@ -34,23 +38,20 @@ def main():
 
 
     print(tabulate([['Sys name',(socket.gethostbyaddr(socket.gethostname())[0])], ['Sys ip', v_ip]], headers=['\nSystem details', '              ']))
-    print(tabulate([['\nport numbers',  n]], headers=['\nList of ports being scanned', '                           ']))
 
     if v_ip is not None:
         for p in port:
-            start_ptime = time.time()
             c = SConnect(v_ip, p)
             if c.portscan() == 0:
-                print(tabulate([['\nport number', p]], headers=['\nList of ports open', '                  ']))
-                open_pcounter += 1
-    else:
-        print("You failed, terminating.\n")
-    print(tabulate([['\nnumber of open ports', open_pcounter]],
-                   headers=['\nTotal number of ports open', '                          ']))
-    logging.info("Finished")
+                port[p]="open"
+    for i in port.keys():
+        if port[i] == "close":
+            x.add_row(['{}'.format(i), "\033[91m {}\033[00m".format(port[i])])
+        else:
+            x.add_row(['{}'.format(i), "\033[92m {}\033[00m".format(port[i])])
+    print('\n')
+    print(x)
 
 
 if __name__ == '__main__':
-    start_time = time.time()
     main()
-    print("--- %s seconds ---" % (time.time() - start_time))
