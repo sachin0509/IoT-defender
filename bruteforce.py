@@ -5,9 +5,19 @@ import time
 import subprocess
 import socket
 import paramiko
+import getpass
+from prettytable import PrettyTable
+
+table=PrettyTable()
+sshTable=PrettyTable()
+userName=getpass.getuser()
+print(userName)
+table.title="BruteForce"
+sshTable.title="Ssh BruteForce"
+
 
 def DictionaryAttack() :
-    hashedPassword = spwd.getspnam("pi")[1]
+    hashedPassword = spwd.getspnam(userName)[1]
     file = open('/home/pi/Desktop/IoT-defender/password', 'r')
     if hashedPassword :
         if hashedPassword == 'x' or hashedPassword == '*' :
@@ -15,7 +25,7 @@ def DictionaryAttack() :
         else :
             for password in file.read().splitlines() :
                 if (crypt.crypt(password, hashedPassword) == hashedPassword) :
-                    print("change the Default passowrd");
+                    table.add_row(["Password is to weak={}".format(password)])
 
 
 def MaximumAuthentication() :
@@ -28,8 +38,7 @@ def MaximumAuthentication() :
                 j + 3] and output[i + 4] == c[j + 4] :
                 print("Lock user account after", output[i + 5], "login attempts")
     except :
-        print("Please set the Maximun authentication",
-              "https://www.linuxtechi.com/lock-user-account-incorrect-login-attempts-linux/")
+        x.add_row(["System is Vulnerable for BruteForce attack"])
 
 
 def BruteForceAttackSSh(hostname, port, password, username="pi") :
@@ -37,7 +46,7 @@ def BruteForceAttackSSh(hostname, port, password, username="pi") :
     # add to know hosts
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try :
-        client.connect(hostname=hostname, port=port, username=username, password=password, timeout=3)
+        client.connect(hostname=hostname, port=port, username=userName, password=password, timeout=3)
     except socket.timeout :
         # this is when host is unreachable
         print("[!] Host: {hostname} is unreachable, timed out.")
@@ -53,6 +62,7 @@ def BruteForceAttackSSh(hostname, port, password, username="pi") :
     else :
         # connection was established successfully
         print("[+] Found combo:\n\tHOSTNAME:",hostname,"\n\tUSERNAME: {username}\n\tPASSWORD: {password}")
+        sshTable.add_row(["Username:{1} \n Password:{2}".format(userName,password)])
         return True
 
 
@@ -78,4 +88,5 @@ if __name__ == "__main__" :
          for password in passwordlist :
              if BruteForceAttackSSh(hostname, int(port), password) :
                  break
-
+    print(table)
+    print(sshTable)
